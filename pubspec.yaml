@@ -1,5 +1,3 @@
-
-
 name: emergency_app
 description: Emergency Alert System - User Mobile App
 publish_to: 'none'
@@ -25,9 +23,10 @@ dependencies:
   # Google Maps
   google_maps_flutter: ^2.5.0
 
-  # Firebase
-  firebase_core: ^2.24.2
-  firebase_messaging: ^14.7.9
+  # Firebase - COMMENTED OUT FOR NOW
+  # Uncomment when you're ready to add Firebase
+  # firebase_core: ^2.24.2
+  # firebase_messaging: ^14.7.9
 
   # Local Storage
   shared_preferences: ^2.2.2

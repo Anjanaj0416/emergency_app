@@ -3,13 +3,13 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-    // Google Services plugin for Firebase
-    id("com.google.gms.google-services")
+    // Google Services plugin for Firebase - COMMENTED OUT until Firebase is needed
+    // id("com.google.gms.google-services")
 }
 
 android {
     namespace = "com.example.emergency_app"
-    compileSdk = 34  // Updated to latest stable version
+    compileSdk = 36  // Updated to latest stable version
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -29,34 +29,33 @@ android {
         minSdk = flutter.minSdkVersion
         
         // Target SDK version (Android 14)
-        targetSdk = 34
+        targetSdk = 36
         
         // Version information
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         
-        // Enable multidex for Firebase and Google Maps
+        // Enable multidex for Google Maps
         multiDexEnabled = true
     }
 
     buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
-            
-            // Optimize for release
-            minifyEnabled = false
-            shrinkResources = false
-        }
-        
-        debug {
-            // Debug configuration
-            applicationIdSuffix = ".debug"
-            debuggable = true
-        }
+    getByName("release") {
+        isMinifyEnabled = false
+        isShrinkResources = false
+        proguardFiles(
+            getDefaultProguardFile("proguard-android-optimize.txt"),
+            "proguard-rules.pro"
+        )
     }
-    
+
+    getByName("debug") {
+        isDebuggable = true
+        isMinifyEnabled = false
+        isShrinkResources = false
+    }
+}
+
     // Packaging options to avoid conflicts
     packagingOptions {
         resources {
@@ -84,11 +83,9 @@ flutter {
 // ============================================
 
 dependencies {
-    // Firebase BOM (Bill of Materials) - ensures compatible versions
-    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
-    
-    // Firebase Cloud Messaging for push notifications
-    implementation("com.google.firebase:firebase-messaging")
+    // Firebase dependencies COMMENTED OUT for now
+    // implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    // implementation("com.google.firebase:firebase-messaging")
     
     // Google Play Services for Maps
     implementation("com.google.android.gms:play-services-maps:18.2.0")
