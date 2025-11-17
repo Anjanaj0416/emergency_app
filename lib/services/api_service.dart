@@ -55,6 +55,7 @@ class ApiService {
   }
 
   // Get nearby emergency centers
+  // ⚠️ FIXED: Corrected endpoint paths to match backend routes
   static Future<List<EmergencyCenter>> getNearbyCenters(
     EmergencyType type,
     double lat,
@@ -64,13 +65,14 @@ class ApiService {
       String endpoint;
       switch (type) {
         case EmergencyType.ambulance:
-          endpoint = 'health-centers';
+          endpoint = 'health-centers/nearby'; // ✅ Fixed endpoint
           break;
         case EmergencyType.police:
-          endpoint = 'police-stations';
+          endpoint =
+              'police/stations'; // ✅ Fixed from 'police-stations' to 'police/stations'
           break;
         case EmergencyType.fire:
-          endpoint = 'fire-stations';
+          endpoint = 'fire-stations/nearby'; // ✅ Fixed endpoint
           break;
       }
 
@@ -79,33 +81,42 @@ class ApiService {
         headers: {'Content-Type': 'application/json'},
       );
 
+      print('🔍 Fetching from: $_baseUrl/$endpoint?lat=$lat&lng=$lng');
+      print('📡 Response status: ${response.statusCode}');
+      print('📦 Response body: ${response.body}');
+
       if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data.map((json) => EmergencyCenter.fromJson(json)).toList();
+        final data = jsonDecode(response.body);
+
+        // Handle both array and object responses
+        List<dynamic> centersData;
+        if (data is List) {
+          centersData = data;
+        } else if (data is Map && data.containsKey('data')) {
+          centersData = data['data'] as List;
+        } else if (data is Map && data.containsKey('stations')) {
+          centersData = data['stations'] as List;
+        } else {
+          print('⚠️ Unexpected response format: $data');
+          return [];
+        }
+
+        return centersData
+            .map((center) => EmergencyCenter.fromJson(center))
+            .toList();
       } else {
+        print('❌ Error response: ${response.body}');
         throw Exception('Failed to fetch centers: ${response.body}');
       }
     } catch (e) {
+      print('❌ Exception in getNearbyCenters: $e');
       throw Exception('Network error: $e');
     }
   }
 
-  // Register user (optional - for future use)
-  static Future<Map<String, dynamic>> register(String phoneNumber) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/user/register'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'phone': phoneNumber}),
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Registration failed: ${response.body}');
-      }
-    } catch (e) {
-      throw Exception('Network error: $e');
-    }
+  // Logout
+  static Future<void> logout() async {
+    // Clear any stored tokens/data
+    // This is handled by AuthProvider
   }
 }
