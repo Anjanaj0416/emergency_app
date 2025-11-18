@@ -26,23 +26,56 @@ class ApiService {
     }
   }
 
-  // Send emergency alert
+  // ✅ UPDATED: Send emergency alert with optional userId and userPhone
   static Future<Map<String, dynamic>> sendAlert(
     EmergencyType type,
     double lat,
-    double lng,
-  ) async {
+    double lng, {
+    String? userId, // ✅ NEW: Optional userId parameter
+    String? userPhone, // ✅ NEW: Optional userPhone parameter
+  }) async {
     try {
+      // ✅ Get the correct type string
+      String typeString;
+      switch (type) {
+        case EmergencyType.ambulance:
+          typeString = 'ambulance';
+          break;
+        case EmergencyType.police:
+          typeString = 'police';
+          break;
+        case EmergencyType.fire:
+          typeString = 'fire';
+          break;
+      }
+
+      final body = {
+        'type': typeString,
+        'lat': lat,
+        'lng': lng,
+        'createdAt': DateTime.now().toIso8601String(),
+      };
+
+      // ✅ NEW: Add userId if provided
+      if (userId != null) {
+        body['userId'] = userId;
+      }
+
+      // ✅ NEW: Add userPhone if provided
+      if (userPhone != null) {
+        body['userPhone'] = userPhone;
+      }
+
+      print('📤 Sending alert with data: $body');
+
       final response = await http.post(
-        Uri.parse('$_baseUrl/alerts/${type.value}'),
+        Uri.parse('$_baseUrl/alerts/$typeString'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'type': type.value,
-          'lat': lat,
-          'lng': lng,
-          'createdAt': DateTime.now().toIso8601String(),
-        }),
+        body: jsonEncode(body),
       );
+
+      print('📡 Alert response status: ${response.statusCode}');
+      print('📦 Alert response body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return jsonDecode(response.body);
@@ -50,6 +83,7 @@ class ApiService {
         throw Exception('Failed to send alert: ${response.body}');
       }
     } catch (e) {
+      print('❌ Error sending alert: $e');
       throw Exception('Network error: $e');
     }
   }
