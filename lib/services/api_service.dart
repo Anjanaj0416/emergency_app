@@ -31,11 +31,11 @@ class ApiService {
     EmergencyType type,
     double lat,
     double lng, {
-    String? userId, // ✅ NEW: Optional userId parameter
-    String? userPhone, // ✅ NEW: Optional userPhone parameter
+    String? userId,
+    String? userPhone,
   }) async {
     try {
-      // ✅ Get the correct type string
+      // Get the correct type string
       String typeString;
       switch (type) {
         case EmergencyType.ambulance:
@@ -56,12 +56,12 @@ class ApiService {
         'createdAt': DateTime.now().toIso8601String(),
       };
 
-      // ✅ NEW: Add userId if provided
+      // Add userId if provided
       if (userId != null) {
         body['userId'] = userId;
       }
 
-      // ✅ NEW: Add userPhone if provided
+      // Add userPhone if provided
       if (userPhone != null) {
         body['userPhone'] = userPhone;
       }
@@ -88,8 +88,7 @@ class ApiService {
     }
   }
 
-  // Get nearby emergency centers
-  // ⚠️ FIXED: Corrected endpoint paths to match backend routes
+  // ✅ FIXED: Get nearby emergency centers with CORRECT endpoints
   static Future<List<EmergencyCenter>> getNearbyCenters(
     EmergencyType type,
     double lat,
@@ -99,14 +98,14 @@ class ApiService {
       String endpoint;
       switch (type) {
         case EmergencyType.ambulance:
-          endpoint = 'health-centers/nearby'; // ✅ Fixed endpoint
+          endpoint = 'health-centers/nearby';
           break;
         case EmergencyType.police:
-          endpoint =
-              'police/stations'; // ✅ Fixed from 'police-stations' to 'police/stations'
+          endpoint = 'police/stations'; // ✅ Correct: /api/police/stations
           break;
         case EmergencyType.fire:
-          endpoint = 'fire-stations/nearby'; // ✅ Fixed endpoint
+          endpoint =
+              'fire/stations/nearby'; // ✅ FIXED: /api/fire/stations/nearby
           break;
       }
 
