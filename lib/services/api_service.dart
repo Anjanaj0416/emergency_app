@@ -98,10 +98,12 @@ class ApiService {
       String endpoint;
       switch (type) {
         case EmergencyType.ambulance:
-          endpoint = 'health-centers/nearby';
+          endpoint =
+              'health/centers/nearby'; // ✅ FIXED: /api/health/centers/nearby
           break;
         case EmergencyType.police:
-          endpoint = 'police/stations'; // ✅ Correct: /api/police/stations
+          endpoint =
+              'police/stations/nearby'; // ✅ FIXED: /api/police/stations/nearby
           break;
         case EmergencyType.fire:
           endpoint =
@@ -109,28 +111,37 @@ class ApiService {
           break;
       }
 
+      print('🔍 Fetching from: $_baseUrl/$endpoint?lat=$lat&lng=$lng');
+
       final response = await http.get(
         Uri.parse('$_baseUrl/$endpoint?lat=$lat&lng=$lng'),
         headers: {'Content-Type': 'application/json'},
       );
 
-      print('🔍 Fetching from: $_baseUrl/$endpoint?lat=$lat&lng=$lng');
       print('📡 Response status: ${response.statusCode}');
       print('📦 Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        // Handle both array and object responses
+        // Handle backend response format: {success: true, data: [...]}
         List<dynamic> centersData;
-        if (data is List) {
-          centersData = data;
-        } else if (data is Map && data.containsKey('data')) {
+
+        if (data is Map && data['success'] == true && data['data'] != null) {
+          // ✅ Standard backend format: {success: true, data: [...]}
           centersData = data['data'] as List;
+          print('✅ Fetched ${centersData.length} nearby centers');
+        } else if (data is List) {
+          // Fallback: Direct array response
+          centersData = data;
+          print('✅ Fetched ${centersData.length} nearby centers');
         } else if (data is Map && data.containsKey('stations')) {
+          // Fallback: {stations: [...]}
           centersData = data['stations'] as List;
+          print('✅ Fetched ${centersData.length} nearby centers');
         } else {
           print('⚠️ Unexpected response format: $data');
+          print('❌ Error response: ${response.body}');
           return [];
         }
 
